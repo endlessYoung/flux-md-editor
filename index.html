@@ -3,21 +3,29 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>FluxMDEditor Demo</title>
+    <title>FluxMDEditor</title>
 </head>
 
 <body>
+    <div class="topbar">
+        <div class="topbar-left">
+            <span class="editor-logo">✦</span>
+            <span class="editor-name">FluxMDEditor</span>
+        </div>
+        <div class="topbar-right">
+            <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+                <span class="theme-toggle-icon">☀</span>
+            </button>
+            <button class="settings-toggle" id="settings-toggle" aria-label="编辑器设置">
+                ⚙
+            </button>
+        </div>
+    </div>
     <div class="app">
         <div class="editor-panel">
             <header class="editor-header">
                 <div class="editor-title">
-                    <span class="editor-logo">✦</span>
-                    <span class="editor-name">FluxMDEditor</span>
-                </div>
-                <div class="editor-header-actions">
-                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-                        <span class="theme-toggle-icon">☀</span>
-                    </button>
+                    <span class="editor-subtitle">文档编辑</span>
                 </div>
             </header>
             <div class="editor-toolbar" id="editor-toolbar"></div>

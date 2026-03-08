@@ -4,6 +4,30 @@ body {
     background: #f6f7f9;
 }
 
+.topbar {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px 4px;
+    max-width: 1440px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.topbar-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.topbar-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .app {
     display: flex;
     height: 100vh;
@@ -259,7 +283,7 @@ body {
     width: 100vw;
     max-width: 1440px;
     margin: 0 auto;
-    padding: 24px;
+    padding: 16px 20px;
     box-sizing: border-box;
     gap: 20px;
 }
@@ -285,19 +309,18 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 18px;
+    padding: 10px 18px;
     border-bottom: 1px solid rgba(226, 232, 240, 0.8);
     background:
         linear-gradient(120deg, rgba(239, 246, 255, 0.95), rgba(248, 250, 252, 0.96));
 }
 
 .editor-title {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    color: #0f172a;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6b7280;
 }
 
 .editor-logo {
@@ -325,6 +348,30 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.settings-toggle {
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 4px 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #6b7280;
+    transition:
+        background-color 0.16s ease,
+        color 0.16s ease,
+        transform 0.08s ease,
+        box-shadow 0.08s ease;
+}
+
+.settings-toggle:hover {
+    background: rgba(15, 23, 42, 0.06);
+    color: #0f172a;
+    box-shadow: 0 1px 3px rgba(148, 163, 184, 0.5);
 }
 
 .theme-toggle {
@@ -446,7 +493,7 @@ body {
 }
 
 .cm-scroller {
-    padding: 16px 18px 28px;
+    padding: 12px 14px 22px;
 }
 
 .cm-content {
@@ -779,6 +826,218 @@ body.is-resizing * {
     transform: translateX(-50%) translateY(0);
 }
 
+/* Slash 命令菜单 */
+
+.slash-menu {
+    position: absolute;
+    z-index: 50;
+    min-width: 220px;
+    max-width: 280px;
+    padding: 6px;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.98);
+    box-shadow:
+        0 22px 60px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 0.95);
+    color: #e5e7eb;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px);
+    transition:
+        opacity 0.16s ease,
+        transform 0.16s ease;
+}
+
+.slash-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.slash-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.slash-menu-item {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: inherit;
+    padding: 6px 8px;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.slash-menu-item-label {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.slash-menu-item-desc {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.slash-menu-item.is-active,
+.slash-menu-item:hover {
+    background: rgba(37, 99, 235, 0.18);
+}
+
+.flux-theme-dark .slash-menu {
+    background: rgba(15, 23, 42, 0.98);
+}
+
+/* 设置面板 */
+
+.settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: transparent;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 60;
+    transition: opacity 0.16s ease;
+}
+
+.settings-overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.settings-panel {
+    position: fixed;
+    top: 80px;
+    right: 32px;
+    width: 280px;
+    max-width: calc(100% - 40px);
+    padding: 14px 14px 12px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.98);
+    color: #e5e7eb;
+    box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+    z-index: 61;
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease;
+}
+
+.settings-panel.is-open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.settings-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.settings-panel-title {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.settings-panel-subtitle {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-bottom: 8px;
+}
+
+.settings-section {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed rgba(148, 163, 184, 0.6);
+}
+
+.settings-section-title {
+    font-size: 11px;
+    font-weight: 500;
+    color: #9ca3af;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+    gap: 8px;
+}
+
+.settings-item-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.settings-item-label-main {
+    font-size: 12px;
+}
+
+.settings-item-label-sub {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.settings-switch {
+    position: relative;
+    width: 32px;
+    height: 18px;
+    border-radius: 999px;
+    background: rgba(51, 65, 85, 0.9);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.settings-switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    transition:
+        transform 0.16s ease,
+        background-color 0.16s ease;
+}
+
+.settings-switch[data-checked="true"] {
+    background: #2563eb;
+}
+
+.settings-switch[data-checked="true"] .settings-switch-thumb {
+    transform: translateX(14px);
+    background: #eff6ff;
+}
+
+.settings-feedback-link {
+    font-size: 12px;
+    color: #93c5fd;
+    text-decoration: none;
+}
+
+.settings-feedback-link:hover {
+    text-decoration: underline;
+}
+
 /* 暗色主题覆盖 */
 
 .flux-theme-dark body {
@@ -810,6 +1069,10 @@ body.is-resizing * {
     background: rgba(15, 23, 42, 0.98);
     border-color: rgba(148, 163, 184, 0.65);
     color: #e5e7eb;
+}
+
+.flux-theme-dark .settings-toggle {
+    color: #9ca3af;
 }
 
 .flux-theme-dark .editor-toolbar {

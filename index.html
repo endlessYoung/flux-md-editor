@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>FluxMDEditor Demo</title>
+</head>
+
+<body>
+    <div class="app">
+        <div class="editor-panel">
+            <header class="editor-header">
+                <div class="editor-title">
+                    <span class="editor-logo">✦</span>
+                    <span class="editor-name">FluxMDEditor</span>
+                </div>
+                <div class="editor-header-actions">
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                        <span class="theme-toggle-icon">☀</span>
+                    </button>
+                </div>
+            </header>
+            <div class="editor-toolbar" id="editor-toolbar"></div>
+            <div id="editor" class="editor"></div>
+        </div>
+        <div class="splitter" id="splitter"></div>
+        <div id="preview" class="preview"></div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

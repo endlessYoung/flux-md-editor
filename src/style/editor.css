@@ -1,0 +1,892 @@
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    background: #f6f7f9;
+}
+
+.app {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* 编辑器 */
+
+.editor {
+    flex: 1;
+    height: 100%;
+    overflow: auto;
+    border-right: 1px solid #e5e7eb;
+}
+
+/* 预览 */
+
+.preview {
+    flex: 1;
+    height: 100%;
+    overflow: auto;
+    padding: 32px;
+    background: #ffffff;
+    max-width: 800px;
+    margin: auto;
+}
+
+/* markdown */
+
+.preview h1 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 6px;
+}
+
+.preview code:not(pre code) {
+
+    background: #f1f5f9;
+
+    padding: 2px 6px;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        monospace;
+}
+
+/* 代码卡片 */
+
+.flux-code-block {
+
+    margin: 24px 0;
+    border-radius: 12px;
+
+    border: 1px solid #e5e7eb;
+
+    background: #f8fafc;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.05),
+        0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+/* header */
+
+.flux-code-header {
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 8px 14px;
+
+    font-size: 12px;
+    color: #6b7280;
+
+    background: #f1f5f9;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.flux-code-block {
+
+    transition: all 0.2s ease;
+}
+
+.flux-code-block:hover {
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.08),
+        0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.copy-btn {
+
+    border: none;
+
+    background: transparent;
+
+    color: #6b7280;
+
+    cursor: pointer;
+
+    font-size: 12px;
+}
+
+.copy-btn:hover {
+
+    color: #111827;
+}
+
+/* mac 圆点 */
+
+.flux-code-header::before {
+    content: "";
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background: #ff5f56;
+    box-shadow:
+        18px 0 #ffbd2e,
+        36px 0 #27c93f;
+}
+
+/* 代码 */
+.flux-code-block pre {
+    margin: 0;
+    padding: 18px;
+    overflow-x: auto;
+    font-size: 14px;
+    line-height: 1.6;
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+}
+
+.flux-code-body {
+
+    display: flex;
+}
+
+/* 行号 */
+
+.flux-code-lines {
+
+    background: #0d1117;
+
+    color: #6e7681;
+
+    padding: 16px 8px;
+
+    text-align: right;
+
+    user-select: none;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+}
+
+.flux-code-lines span {
+
+    display: block;
+}
+
+/* code */
+
+.flux-code-body pre {
+
+    margin: 0;
+
+    flex: 1;
+
+    overflow: auto;
+
+    padding: 16px;
+}
+
+.cm-activeLine {
+    background: transparent !important;
+}
+
+.cm-focused .cm-activeLine {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.cm-editor {
+
+    font-size: 16px;
+
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+}
+
+.cm-content {
+
+    line-height: 1.7;
+}
+
+.cm-cursor {
+
+    border-left: 2px solid #2563eb;
+}
+
+.cm-selectionBackground {
+
+    background: rgba(37, 99, 235, 0.15);
+}
+
+/* highlight.js */
+
+.hljs {
+    background: transparent !important;
+}
+
+/* ===== FluxMDEditor layout & theme (enhanced) ===== */
+
+body {
+    background:
+        radial-gradient(circle at 0% 0%, #e0f2fe 0, transparent 55%),
+        radial-gradient(circle at 100% 100%, #f5e9ff 0, transparent 55%),
+        #f5f5f7;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    transition:
+        background 0.25s ease,
+        color 0.25s ease;
+}
+
+.app {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px;
+    box-sizing: border-box;
+    gap: 20px;
+}
+
+/* 左侧编辑区域容器 */
+
+.editor-panel {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    box-shadow:
+        0 18px 50px rgba(15, 23, 42, 0.14),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    backdrop-filter: blur(18px);
+    overflow: hidden;
+}
+
+.editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    background:
+        linear-gradient(120deg, rgba(239, 246, 255, 0.95), rgba(248, 250, 252, 0.96));
+}
+
+.editor-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: #0f172a;
+}
+
+.editor-logo {
+    width: 26px;
+    height: 26px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 0% 0%, #38bdf8, #6366f1);
+    color: #f9fafb;
+    font-size: 16px;
+    box-shadow:
+        0 6px 16px rgba(59, 130, 246, 0.5),
+        0 0 0 1px rgba(15, 23, 42, 0.18);
+}
+
+.editor-name {
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #1f2937;
+}
+
+.editor-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-toggle {
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.6);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 4px 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #475569;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.08s ease,
+        box-shadow 0.08s ease;
+    box-shadow: 0 1px 2px rgba(148, 163, 184, 0.35);
+}
+
+.theme-toggle:hover {
+    background: #0f172a;
+    color: #e5e7eb;
+    border-color: #0f172a;
+    box-shadow:
+        0 6px 18px rgba(15, 23, 42, 0.5),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+}
+
+.theme-toggle:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.5);
+}
+
+.theme-toggle-icon {
+    font-size: 14px;
+}
+
+/* 工具栏 */
+
+.editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    background: linear-gradient(90deg, #f9fafb, #eef2ff);
+}
+
+.toolbar-btn {
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 4px 12px;
+    font-size: 12px;
+    color: #4b5563;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition:
+        background-color 0.16s ease,
+        color 0.16s ease,
+        box-shadow 0.16s ease,
+        transform 0.08s ease,
+        border-color 0.16s ease;
+    box-shadow:
+        0 1px 3px rgba(148, 163, 184, 0.45),
+        0 0 0 1px rgba(226, 232, 240, 0.8);
+    white-space: nowrap;
+}
+
+.toolbar-btn:hover {
+    background: #111827;
+    color: #e5e7eb;
+    border-color: #0f172a;
+    box-shadow:
+        0 8px 22px rgba(15, 23, 42, 0.45),
+        0 0 0 1px rgba(15, 23, 42, 0.95);
+    transform: translateY(-1px);
+}
+
+.toolbar-btn:active {
+    transform: translateY(0);
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, 0.5),
+        0 0 0 1px rgba(15, 23, 42, 1);
+}
+
+.toolbar-btn:first-of-type {
+    margin-left: 4px;
+}
+
+.toolbar-btn:last-of-type {
+    margin-right: 4px;
+}
+
+/* 编辑器主体 */
+
+.editor {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    border-top: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.cm-editor {
+    height: 100%;
+    font-size: 15px;
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+}
+
+.cm-scroller {
+    padding: 16px 18px 28px;
+}
+
+.cm-content {
+    line-height: 1.7;
+}
+
+.cm-activeLine {
+    background: transparent !important;
+}
+
+.cm-focused .cm-activeLine {
+    background: rgba(37, 99, 235, 0.06);
+}
+
+.cm-cursor {
+    border-left: 2px solid #2563eb;
+}
+
+.cm-selectionBackground {
+    background: rgba(37, 99, 235, 0.15);
+}
+
+/* 右侧预览面板 */
+
+.preview {
+    flex: 1.05;
+    min-width: 0;
+    height: 100%;
+    overflow: auto;
+    padding: 28px 32px 32px;
+    background: rgba(248, 250, 252, 0.9);
+    border-radius: 18px;
+    border: 1px solid rgba(203, 213, 225, 0.9);
+    box-shadow:
+        0 16px 40px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.25);
+    box-sizing: border-box;
+}
+
+.preview-inner {
+    max-width: 840px;
+    margin: 0 auto;
+}
+
+/* markdown 排版系统 */
+
+.preview h1,
+.preview h2,
+.preview h3,
+.preview h4,
+.preview h5,
+.preview h6 {
+    font-weight: 650;
+    color: #0f172a;
+    scroll-margin-top: 80px;
+}
+
+.preview h1 {
+    font-size: 28px;
+    margin: 0 0 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.preview h2 {
+    font-size: 22px;
+    margin: 28px 0 12px;
+}
+
+.preview h3 {
+    font-size: 18px;
+    margin: 20px 0 10px;
+}
+
+.preview p {
+    margin: 10px 0;
+    color: #1f2933;
+    font-size: 14px;
+}
+
+.preview a {
+    color: #2563eb;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(37, 99, 235, 0.28);
+    padding-bottom: 1px;
+}
+
+.preview a:hover {
+    color: #1d4ed8;
+    border-bottom-color: rgba(29, 78, 216, 0.65);
+}
+
+.preview ul,
+.preview ol {
+    margin: 10px 0 10px 22px;
+    color: #1f2933;
+}
+
+.preview li+li {
+    margin-top: 4px;
+}
+
+.preview blockquote {
+    margin: 14px 0;
+    padding: 10px 14px;
+    border-left: 3px solid #3b82f6;
+    background: rgba(239, 246, 255, 0.8);
+    border-radius: 6px;
+    color: #1d4ed8;
+    font-size: 13px;
+}
+
+.preview code:not(pre code) {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        monospace;
+}
+
+.preview hr {
+    border: none;
+    border-top: 1px dashed rgba(148, 163, 184, 0.7);
+    margin: 24px 0;
+}
+
+.preview table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+}
+
+.preview th,
+.preview td {
+    border: 1px solid rgba(203, 213, 225, 0.9);
+    padding: 8px 10px;
+    text-align: left;
+}
+
+.preview th {
+    background: rgba(241, 245, 249, 0.9);
+    font-weight: 600;
+}
+
+.preview tr:nth-child(even) td {
+    background: rgba(248, 250, 252, 0.8);
+}
+
+.preview img {
+    max-width: 100%;
+    display: block;
+    border-radius: 12px;
+    margin: 16px 0;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+}
+
+/* 代码卡片高级样式覆盖 */
+
+.flux-code-block {
+    margin: 22px 0;
+    border-radius: 14px;
+    border: 1px solid rgba(15, 23, 42, 0.9);
+    background: radial-gradient(circle at 0 0, #1f2937, #020617);
+    overflow: hidden;
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 0.8);
+}
+
+.flux-code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    font-size: 11px;
+    color: #cbd5f5;
+    background: linear-gradient(90deg, #020617, #111827);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.95);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.flux-code-header-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.flux-code-lang {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.flux-code-block:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 22px 55px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.98);
+}
+
+.flux-code-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.flux-copy-btn {
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
+        transform 0.08s ease;
+}
+
+.flux-copy-btn:hover {
+    color: #e5e7eb;
+    background: rgba(15, 23, 42, 0.85);
+    transform: translateY(-0.5px);
+}
+
+.flux-copy-btn svg {
+    fill: currentColor;
+}
+
+.flux-copy-btn.copied {
+    color: #22c55e;
+}
+
+.flux-copy-btn.copied:hover {
+    background: rgba(5, 46, 22, 0.7);
+}
+
+.flux-code-header::before {
+    content: "";
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background: #22c55e;
+    box-shadow:
+        18px 0 #eab308,
+        36px 0 #f97316;
+}
+
+.flux-code-block pre {
+    margin: 0;
+    padding: 18px 18px 20px;
+    overflow-x: auto;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.flux-code-lines {
+    background: #020617;
+    color: #64748b;
+    padding: 16px 8px;
+    text-align: right;
+    user-select: none;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* 拖拽分隔条 */
+
+.splitter {
+    flex: 0 0 6px;
+    cursor: col-resize;
+    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.45));
+    border-radius: 999px;
+    align-self: stretch;
+    margin: 8px 0;
+    position: relative;
+}
+
+.splitter::before {
+    content: "";
+    position: absolute;
+    top: 24%;
+    bottom: 24%;
+    left: 1px;
+    right: 1px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.8);
+}
+
+body.is-resizing,
+body.is-resizing * {
+    cursor: col-resize !important;
+}
+
+/* 复制成功 Toast */
+
+.flux-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%) translateY(20px);
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.95);
+    color: #e5e7eb;
+    font-size: 12px;
+    box-shadow:
+        0 14px 30px rgba(15, 23, 42, 0.7),
+        0 0 0 1px rgba(15, 23, 42, 0.95);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease;
+    z-index: 40;
+}
+
+.flux-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* 暗色主题覆盖 */
+
+.flux-theme-dark body {
+    background:
+        radial-gradient(circle at 0% 0%, #020617 0, transparent 55%),
+        radial-gradient(circle at 100% 100%, #111827 0, transparent 55%),
+        #020617;
+    color: #e5e7eb;
+}
+
+.flux-theme-dark .editor-panel {
+    background: rgba(15, 23, 42, 0.96);
+    border-color: rgba(15, 23, 42, 0.95);
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(15, 23, 42, 1);
+}
+
+.flux-theme-dark .editor-header {
+    background: linear-gradient(120deg, #020617, #0b1120);
+    border-bottom-color: rgba(15, 23, 42, 0.95);
+}
+
+.flux-theme-dark .editor-name {
+    color: #e5e7eb;
+}
+
+.flux-theme-dark .theme-toggle {
+    background: rgba(15, 23, 42, 0.98);
+    border-color: rgba(148, 163, 184, 0.65);
+    color: #e5e7eb;
+}
+
+.flux-theme-dark .editor-toolbar {
+    background: linear-gradient(90deg, #020617, #111827);
+    border-bottom-color: rgba(15, 23, 42, 0.95);
+}
+
+.flux-theme-dark .toolbar-btn {
+    background: rgba(15, 23, 42, 0.9);
+    color: #e5e7eb;
+    box-shadow:
+        0 1px 4px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(30, 64, 175, 0.4);
+}
+
+.flux-theme-dark .toolbar-btn:hover {
+    background: #f9fafb;
+    color: #0f172a;
+}
+
+.flux-theme-dark .preview {
+    background: radial-gradient(circle at 0 0, #0b1120, #020617);
+    border-color: rgba(15, 23, 42, 0.95);
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.98);
+}
+
+.flux-theme-dark .preview h1,
+.flux-theme-dark .preview h2,
+.flux-theme-dark .preview h3,
+.flux-theme-dark .preview h4,
+.flux-theme-dark .preview h5,
+.flux-theme-dark .preview h6 {
+    color: #e5e7eb;
+}
+
+.flux-theme-dark .preview p,
+.flux-theme-dark .preview ul,
+.flux-theme-dark .preview ol {
+    color: #cbd5f5;
+}
+
+.flux-theme-dark .preview blockquote {
+    background: rgba(30, 64, 175, 0.15);
+    border-color: #60a5fa;
+    color: #bfdbfe;
+}
+
+.flux-theme-dark .preview code:not(pre code) {
+    background: rgba(15, 23, 42, 0.95);
+    color: #e5e7eb;
+}
+
+.flux-theme-dark .preview th {
+    background: rgba(15, 23, 42, 0.96);
+}
+
+.flux-theme-dark .preview tr:nth-child(even) td {
+    background: rgba(15, 23, 42, 0.75);
+}
+
+.flux-theme-dark .preview img {
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.95);
+}
+
+.flux-theme-dark .splitter {
+    background: linear-gradient(to bottom, rgba(30, 41, 59, 0.4), rgba(30, 41, 59, 0.9));
+}
+
+.flux-theme-dark .splitter::before {
+    background: rgba(148, 163, 184, 0.9);
+}
+
+.flux-theme-dark .flux-toast {
+    background: rgba(15, 23, 42, 0.98);
+    box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.95),
+        0 0 0 1px rgba(30, 64, 175, 0.9);
+}

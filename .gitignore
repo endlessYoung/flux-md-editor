@@ -1,0 +1,31 @@
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sw?
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Vite / cache
+.vite/
+vite.config.ts.timestamp-*
+
+# Test coverage
+coverage/
+
+# Cursor / IDE metadata
+.cursor/
+

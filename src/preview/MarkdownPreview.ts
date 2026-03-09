@@ -83,6 +83,7 @@ export class MarkdownPreview {
 
         this.renderMermaid()
         this.bindCopyButtons()
+        this.renderOutline()
 
     }
 
@@ -115,12 +116,7 @@ export class MarkdownPreview {
     }
 
     private copyIcon() {
-
-        return `
-<svg viewBox="0 -960 960 960" width="16" height="16">
-<path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/>
-</svg>
-`
+        return `<i class="fa-solid fa-copy flux-copy-icon" aria-hidden="true"></i>`
     }
 
     private escapeHtml(str: string) {
@@ -201,6 +197,76 @@ export class MarkdownPreview {
             toast?.classList.remove("visible")
 
         }, 1800)
+    }
+
+    private renderOutline() {
+
+        const toc = document.getElementById("toc-panel")
+
+        if (!toc) return
+
+        toc.innerHTML = ""
+
+        const title = document.createElement("div")
+
+        title.className = "toc-title"
+        title.textContent = "大纲"
+
+        toc.appendChild(title)
+
+        const headings = this.el.querySelectorAll<HTMLElement>("h1, h2, h3")
+
+        if (!headings.length) {
+
+            const empty = document.createElement("div")
+
+            empty.className = "toc-empty"
+            empty.textContent = "当前文档暂无标题"
+
+            toc.appendChild(empty)
+
+            return
+        }
+
+        const list = document.createElement("ul")
+
+        list.className = "toc-list"
+
+        headings.forEach((h) => {
+
+            const level = Number(h.tagName.substring(1)) || 1
+
+            let id = h.id
+
+            if (!id) {
+
+                id = h.textContent?.toLowerCase().replace(/\s+/g, "-") || ""
+
+                if (id) h.id = id
+            }
+
+            const li = document.createElement("li")
+
+            li.className = "toc-item"
+
+            const link = document.createElement("a")
+
+            link.className = `toc-link level-${level}`
+            link.textContent = h.textContent || ""
+            link.href = `#${id}`
+
+            link.addEventListener("click", (event) => {
+
+                event.preventDefault()
+
+                h.scrollIntoView({ behavior: "smooth", block: "start" })
+            })
+
+            li.appendChild(link)
+            list.appendChild(li)
+        })
+
+        toc.appendChild(list)
     }
 
 }

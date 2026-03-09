@@ -4,24 +4,41 @@
 <head>
     <meta charset="UTF-8" />
     <title>FluxMDEditor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
     <div class="topbar">
         <div class="topbar-left">
-            <span class="editor-logo">✦</span>
+            <span class="editor-logo"><i class="fa-solid fa-pen-to-square"></i></span>
             <span class="editor-name">FluxMDEditor</span>
         </div>
         <div class="topbar-right">
+            <div class="layout-toggle-group" aria-label="布局模式切换">
+                <button class="layout-toggle is-active" data-layout="split" type="button" title="编辑 + 预览">
+                    对半
+                </button>
+                <button class="layout-toggle" data-layout="edit" type="button" title="仅编辑">
+                    编辑
+                </button>
+                <button class="layout-toggle" data-layout="preview" type="button" title="仅预览">
+                    预览
+                </button>
+            </div>
+            <button class="topbar-icon-btn" id="toc-toggle" aria-label="切换大纲显示" title="切换大纲显示">
+                <i class="fa-solid fa-list-ul"></i><span class="toc-btn-text">大纲</span>
+            </button>
             <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
-                <span class="theme-toggle-icon">☀</span>
+                <span class="theme-toggle-icon"><i class="fa-solid fa-sun"></i></span>
             </button>
             <button class="settings-toggle" id="settings-toggle" aria-label="编辑器设置">
-                ⚙
+                <i class="fa-solid fa-gear"></i>
             </button>
         </div>
     </div>
     <div class="app">
+        <aside class="toc-panel" id="toc-panel"></aside>
         <div class="editor-panel">
             <header class="editor-header">
                 <div class="editor-title">
@@ -29,11 +46,16 @@
                 </div>
             </header>
             <div class="editor-toolbar" id="editor-toolbar"></div>
-            <div id="editor" class="editor"></div>
+            <div id="editor" class="editor flux-editor-surface"></div>
         </div>
         <div class="splitter" id="splitter"></div>
-        <div id="preview" class="preview"></div>
+        <div id="preview" class="preview flux-preview-surface"></div>
     </div>
+
+    <div class="status-bar" id="status-bar"></div>
+
+    <button type="button" class="flux-back-to-top" id="back-to-top" aria-label="回到顶部" title="回到顶部"><i
+            class="fa-solid fa-arrow-up"></i></button>
 
     <script type="module" src="/src/main.ts"></script>
 </body>

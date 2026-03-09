@@ -5,15 +5,20 @@ import "./style/editor.css"
 let syncScrollEnabled = true
 let slashMenuEnabled = true
 let imagePasteEnabled = true
+let currentLayout: "split" | "edit" | "preview" = "split"
+let autoSaveEnabled = true
+let showStatsEnabled = true
 
 const editorEl = document.getElementById("editor")!
 const previewEl = document.getElementById("preview")!
 
 const preview = new MarkdownPreview(previewEl)
 
+const draft = window.localStorage.getItem("flux-draft")
+
 const editor = new FluxEditor({
     container: editorEl,
-    initialValue: `# FluxMDEditor 使用指南
+    initialValue: draft || `# FluxMDEditor 使用指南
 
 > 一份覆盖常用 Markdown 语法的速查手册，建议先随便改一改感受一下。
 
@@ -145,6 +150,16 @@ $$
     onChange(md) {
 
         preview.render(md)
+        if (autoSaveEnabled) {
+            try {
+                window.localStorage.setItem("flux-draft", md)
+            } catch {
+                // ignore
+            }
+        }
+        if (showStatsEnabled) {
+            updateStatusBar(md)
+        }
     }
 })
 
@@ -154,9 +169,15 @@ setupSplitter()
 setupSlashCommands(editor, editorEl)
 setupImagePaste(editor)
 setupScrollSync(editor, previewEl)
+setupBackToTop(editor, previewEl)
 setupSettings()
+setupLayoutToggle()
+setupTocToggle()
 
 preview.render(editor.getMarkdown())
+if (showStatsEnabled) {
+    updateStatusBar(editor.getMarkdown())
+}
 
 function setupToolbar(editor: FluxEditor) {
 
@@ -244,14 +265,16 @@ function setupThemeToggle() {
         window.localStorage.setItem("flux-theme", isDark ? "dark" : "light")
 
         if (iconEl) {
-
-            iconEl.textContent = isDark ? "🌙" : "☀"
+            iconEl.innerHTML = isDark
+                ? '<i class="fa-solid fa-moon"></i>'
+                : '<i class="fa-solid fa-sun"></i>'
         }
     })
 
     if (iconEl) {
-
-        iconEl.textContent = initialDark ? "🌙" : "☀"
+        iconEl.innerHTML = initialDark
+            ? '<i class="fa-solid fa-moon"></i>'
+            : '<i class="fa-solid fa-sun"></i>'
     }
 }
 
@@ -575,6 +598,17 @@ function setupScrollSync(editor: FluxEditor, preview: HTMLElement) {
     })
 }
 
+function setupBackToTop(editor: FluxEditor, preview: HTMLElement) {
+    const btn = document.getElementById("back-to-top")
+    if (!btn) return
+    const scroller = editor.getDom().querySelector(".cm-scroller") as HTMLElement | null
+    btn.addEventListener("click", () => {
+        if (scroller) scroller.scrollTop = 0
+        preview.scrollTop = 0
+        window.scrollTo({ top: 0, behavior: "smooth" })
+    })
+}
+
 function setupSettings() {
 
     const settingsBtn = document.getElementById("settings-toggle")
@@ -624,6 +658,24 @@ function setupSettings() {
         <span class="settings-switch-thumb"></span>
       </button>
     </div>
+    <div class="settings-item">
+      <div class="settings-item-label">
+        <span class="settings-item-label-main">自动保存草稿</span>
+        <span class="settings-item-label-sub">定期将内容保存到本地，下次可继续编辑</span>
+      </div>
+      <button class="settings-switch" data-key="autoSave" data-checked="true">
+        <span class="settings-switch-thumb"></span>
+      </button>
+    </div>
+    <div class="settings-item">
+      <div class="settings-item-label">
+        <span class="settings-item-label-main">显示字数与阅读时间</span>
+        <span class="settings-item-label-sub">在底部状态栏显示当前文档统计信息</span>
+      </div>
+      <button class="settings-switch" data-key="showStats" data-checked="true">
+        <span class="settings-switch-thumb"></span>
+      </button>
+    </div>
   </div>
 
   <div class="settings-section">
@@ -634,6 +686,34 @@ function setupSettings() {
         <span class="settings-item-label-sub">觉得好用 / 有想法都可以告诉作者</span>
       </div>
       <a class="settings-feedback-link" href="mailto:fluxmd-feedback@example.com?subject=FluxMDEditor%20反馈">发送邮件</a>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">排版</div>
+    <div class="settings-item">
+      <div class="settings-item-label">
+        <span class="settings-item-label-main">编辑区字号</span>
+        <span class="settings-item-label-sub">调整 CodeMirror 中的字体大小</span>
+      </div>
+      <select class="settings-select" data-key="editorFontSize">
+        <option value="14px">14px</option>
+        <option value="15px" selected>15px</option>
+        <option value="16px">16px</option>
+        <option value="18px">18px</option>
+      </select>
+    </div>
+    <div class="settings-item">
+      <div class="settings-item-label">
+        <span class="settings-item-label-main">预览区字号</span>
+        <span class="settings-item-label-sub">调整右侧预览文本字号</span>
+      </div>
+      <select class="settings-select" data-key="previewFontSize">
+        <option value="13px">13px</option>
+        <option value="14px" selected>14px</option>
+        <option value="15px">15px</option>
+        <option value="16px">16px</option>
+      </select>
     </div>
   </div>
 `
@@ -660,6 +740,34 @@ function setupSettings() {
             } else if (key === "imagePaste") {
 
                 sw.dataset.checked = String(imagePasteEnabled)
+
+            } else if (key === "autoSave") {
+
+                sw.dataset.checked = String(autoSaveEnabled)
+
+            } else if (key === "showStats") {
+
+                sw.dataset.checked = String(showStatsEnabled)
+            }
+        })
+
+        const selects = panel.querySelectorAll<HTMLSelectElement>(".settings-select")
+
+        selects.forEach((sel) => {
+
+            const key = sel.dataset.key
+
+            if (key === "editorFontSize") {
+
+                sel.value = getComputedStyle(document.documentElement)
+                    .getPropertyValue("--flux-editor-font-size")
+                    .trim() || "15px"
+
+            } else if (key === "previewFontSize") {
+
+                sel.value = getComputedStyle(document.documentElement)
+                    .getPropertyValue("--flux-preview-font-size")
+                    .trim() || "14px"
             }
         })
     }
@@ -721,14 +829,56 @@ function setupSettings() {
         } else if (key === "imagePaste") {
 
             imagePasteEnabled = !imagePasteEnabled
+
+        } else if (key === "autoSave") {
+
+            autoSaveEnabled = !autoSaveEnabled
+
+        } else if (key === "showStats") {
+
+            showStatsEnabled = !showStatsEnabled
         }
 
+        persistSettings()
         syncFromState()
+    })
+
+    panel.addEventListener("change", (event) => {
+
+        const target = event.target as HTMLSelectElement
+
+        if (!target.classList.contains("settings-select")) return
+
+        const key = target.dataset.key
+
+        if (!key) return
+
+        if (key === "editorFontSize") {
+
+            document.documentElement.style.setProperty("--flux-editor-font-size", target.value)
+
+        } else if (key === "previewFontSize") {
+
+            document.documentElement.style.setProperty("--flux-preview-font-size", target.value)
+        }
+
+        persistSettings()
+    })
+
+    function persistSettings() {
 
         const payload = {
             syncScroll: syncScrollEnabled,
             slashMenu: slashMenuEnabled,
-            imagePaste: imagePasteEnabled
+            imagePaste: imagePasteEnabled,
+            autoSave: autoSaveEnabled,
+            showStats: showStatsEnabled,
+            editorFontSize: getComputedStyle(document.documentElement)
+                .getPropertyValue("--flux-editor-font-size")
+                .trim(),
+            previewFontSize: getComputedStyle(document.documentElement)
+                .getPropertyValue("--flux-preview-font-size")
+                .trim()
         }
 
         try {
@@ -738,7 +888,7 @@ function setupSettings() {
         } catch {
             // 忽略本地存储失败
         }
-    })
+    }
 
     // 从本地存储恢复设置
     try {
@@ -751,11 +901,28 @@ function setupSettings() {
                 syncScroll: boolean
                 slashMenu: boolean
                 imagePaste: boolean
+                autoSave: boolean
+                showStats: boolean
+                editorFontSize: string
+                previewFontSize: string
             }>
 
             if (typeof parsed.syncScroll === "boolean") syncScrollEnabled = parsed.syncScroll
             if (typeof parsed.slashMenu === "boolean") slashMenuEnabled = parsed.slashMenu
             if (typeof parsed.imagePaste === "boolean") imagePasteEnabled = parsed.imagePaste
+            if (typeof parsed.autoSave === "boolean") autoSaveEnabled = parsed.autoSave
+            if (typeof parsed.showStats === "boolean") showStatsEnabled = parsed.showStats
+
+            if (parsed.editorFontSize) {
+                document.documentElement.style.setProperty("--flux-editor-font-size", parsed.editorFontSize)
+            }
+
+            if (parsed.previewFontSize) {
+                document.documentElement.style.setProperty(
+                    "--flux-preview-font-size",
+                    parsed.previewFontSize
+                )
+            }
 
             syncFromState()
         }
@@ -763,4 +930,88 @@ function setupSettings() {
     } catch {
         // 忽略解析失败
     }
+}
+
+function setupLayoutToggle() {
+
+    const buttons = document.querySelectorAll<HTMLButtonElement>(".layout-toggle")
+
+    if (!buttons.length) return
+
+    const root = document.documentElement
+
+    function apply(layout: "split" | "edit" | "preview") {
+
+        currentLayout = layout
+
+        root.dataset.layout = layout
+
+        buttons.forEach((btn) => {
+
+            btn.classList.toggle("is-active", btn.dataset.layout === layout)
+        })
+    }
+
+    buttons.forEach((btn) => {
+
+        btn.addEventListener("click", (event) => {
+
+            event.preventDefault()
+
+            const layout = btn.dataset.layout as "split" | "edit" | "preview" | undefined
+
+            if (!layout) return
+
+            apply(layout)
+        })
+    })
+
+    apply(currentLayout)
+}
+
+function updateStatusBar(markdown: string) {
+
+    const bar = document.getElementById("status-bar")
+
+    if (!bar) return
+
+    if (!showStatsEnabled) {
+
+        bar.textContent = ""
+        return
+    }
+
+    const plain = markdown
+        .replace(/```[\s\S]*?```/g, "")
+        .replace(/`[^`]*`/g, "")
+        .replace(/!\[[^\]]*]\([^)]*\)/g, "")
+        .replace(/\[[^\]]*]\([^)]*\)/g, "")
+        .replace(/[#>*\-]+/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+
+    const length = plain.length
+
+    const words = length
+
+    const minutes = Math.max(1, Math.round(length / 500))
+
+    bar.innerHTML = `<span>${words} 字</span><span>预计 ${minutes} 分钟阅读</span>`
+}
+
+function setupTocToggle() {
+
+    const btn = document.getElementById("toc-toggle")
+    const toc = document.getElementById("toc-panel")
+
+    if (!btn || !toc) return
+
+    btn.addEventListener("click", (event) => {
+
+        event.preventDefault()
+
+        const hidden = document.body.classList.toggle("flux-toc-hidden")
+
+        btn.classList.toggle("is-active", !hidden)
+    })
 }

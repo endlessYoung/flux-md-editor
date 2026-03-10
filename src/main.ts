@@ -8,6 +8,8 @@ let imagePasteEnabled = true
 let currentLayout: "split" | "edit" | "preview" = "split"
 let autoSaveEnabled = true
 let showStatsEnabled = true
+let currentFileName: string | null = null
+let lastDraftContent: string | null = null
 
 const editorEl = document.getElementById("editor")!
 const previewEl = document.getElementById("preview")!
@@ -15,6 +17,8 @@ const previewEl = document.getElementById("preview")!
 const preview = new MarkdownPreview(previewEl)
 
 const draft = window.localStorage.getItem("flux-draft")
+
+lastDraftContent = draft
 
 const editor = new FluxEditor({
     container: editorEl,
@@ -153,6 +157,7 @@ $$
         if (autoSaveEnabled) {
             try {
                 window.localStorage.setItem("flux-draft", md)
+                lastDraftContent = md
             } catch {
                 // ignore
             }
@@ -164,8 +169,9 @@ $$
 })
 
 setupToolbar(editor)
+setupFileActions(editor, preview)
 setupThemeToggle()
-setupSplitter()
+setupSplitterV2()
 setupSlashCommands(editor, editorEl)
 setupImagePaste(editor)
 setupScrollSync(editor, previewEl)
@@ -240,6 +246,77 @@ function setupToolbar(editor: FluxEditor) {
 
         toolbar.appendChild(btn)
     }
+}
+
+function setupFileActions(editor: FluxEditor, preview: MarkdownPreview) {
+
+    const openBtn = document.getElementById("file-open-btn")
+    const saveBtn = document.getElementById("file-save-btn")
+    const exportBtn = document.getElementById("file-export-btn")
+
+    if (!openBtn && !saveBtn && !exportBtn) return
+
+    const fileInput = document.createElement("input")
+    fileInput.type = "file"
+    fileInput.accept = ".md,text/markdown,text/plain"
+    fileInput.style.display = "none"
+    document.body.appendChild(fileInput)
+
+    fileInput.addEventListener("change", () => {
+
+        const file = fileInput.files?.[0]
+        if (!file) return
+
+        currentFileName = file.name
+
+        const reader = new FileReader()
+        reader.onload = () => {
+            const text = typeof reader.result === "string" ? reader.result : ""
+            if (!text) return
+            editor.setMarkdown(text)
+        }
+        reader.readAsText(file)
+    })
+
+    openBtn?.addEventListener("click", (event) => {
+
+        event.preventDefault()
+        fileInput.click()
+    })
+
+    saveBtn?.addEventListener("click", (event) => {
+
+        event.preventDefault()
+
+        const md = editor.getMarkdown()
+        const blob = new Blob([md], { type: "text/markdown;charset=utf-8" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = currentFileName || "FluxMDEditor-note.md"
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        URL.revokeObjectURL(url)
+    })
+
+    exportBtn?.addEventListener("click", (event) => {
+
+        event.preventDefault()
+
+        const md = editor.getMarkdown()
+        const title = currentFileName || "FluxMDEditor 文档"
+        const html = preview.exportHtmlDocument(md, title)
+        const blob = new Blob([html], { type: "text/html;charset=utf-8" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = (currentFileName || "FluxMDEditor-note.md").replace(/\.md$/i, "") + ".html"
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        URL.revokeObjectURL(url)
+    })
 }
 
 function setupThemeToggle() {
@@ -481,7 +558,10 @@ function setupSlashCommands(editor: FluxEditor, editorContainer: HTMLElement) {
 
         if (event.key === "/" && !open) {
 
-            // 仅在行首或空行时触发更自然，这里简化处理：总是打开
+            // 调出 Slash 菜单时不把 "/" 写进文档
+            event.preventDefault()
+
+            // 仅在行首或空行时触发会更自然，这里先全局触发
             openMenu()
 
             return
@@ -996,7 +1076,22 @@ function updateStatusBar(markdown: string) {
 
     const minutes = Math.max(1, Math.round(length / 500))
 
-    bar.innerHTML = `<span>${words} 字</span><span>预计 ${minutes} 分钟阅读</span>`
+    let statusText = ""
+
+    if (!autoSaveEnabled) {
+
+        statusText = "自动保存已关闭"
+
+    } else if (lastDraftContent !== null && lastDraftContent === markdown) {
+
+        statusText = "草稿已自动保存"
+
+    } else {
+
+        statusText = "有未保存更改"
+    }
+
+    bar.innerHTML = `<span>${words} 字</span><span>预计 ${minutes} 分钟阅读</span><span>${statusText}</span>`
 }
 
 function setupTocToggle() {
@@ -1013,5 +1108,80 @@ function setupTocToggle() {
         const hidden = document.body.classList.toggle("flux-toc-hidden")
 
         btn.classList.toggle("is-active", !hidden)
+    })
+}
+
+function setupSplitterV2() {
+
+    const app = document.querySelector<HTMLElement>(".app")
+    const editorPanel = document.querySelector<HTMLElement>(".editor-panel")
+    const preview = document.getElementById("preview") as HTMLElement | null
+    const splitter = document.getElementById("splitter")
+
+    if (!app || !editorPanel || !preview || !splitter) return
+
+    let dragging = false
+    let startX = 0
+    let startEditorWidth = 0
+    let totalWidth = 0
+
+    splitter.addEventListener("mousedown", (event) => {
+
+        event.preventDefault()
+
+        const appRect = app.getBoundingClientRect()
+        const editorRect = editorPanel.getBoundingClientRect()
+
+        dragging = true
+        startX = event.clientX
+        startEditorWidth = editorRect.width
+        totalWidth = appRect.width
+
+        document.body.classList.add("is-resizing")
+    })
+
+    window.addEventListener("mousemove", (event) => {
+
+        if (!dragging) return
+        if (!totalWidth) return
+
+        const delta = event.clientX - startX
+        const minWidth = totalWidth * 0.2
+
+        const tocVisible = !document.body.classList.contains("flux-toc-hidden")
+        const toc = document.getElementById("toc-panel")
+        const tocWidth = tocVisible && toc ? toc.getBoundingClientRect().width : 0
+        const splitterWidth = splitter.getBoundingClientRect().width
+
+        const availableForPanels = totalWidth - tocWidth - splitterWidth
+        if (availableForPanels <= 0) return
+
+        const maxRatio = tocVisible ? 0.6 : 0.7
+        const maxWidth = availableForPanels * maxRatio
+
+        let nextWidth = startEditorWidth + delta
+        nextWidth = Math.max(minWidth, Math.min(maxWidth, nextWidth))
+
+        // 确保预览区域至少保留 320px 宽度
+        const minPreviewWidth = 320
+        let nextPreviewWidth = availableForPanels - nextWidth
+        if (nextPreviewWidth < minPreviewWidth) {
+            nextPreviewWidth = minPreviewWidth
+            nextWidth = availableForPanels - minPreviewWidth
+        }
+
+        const editorPercent = (nextWidth / totalWidth) * 100
+        const previewPercent = (nextPreviewWidth / totalWidth) * 100
+
+        editorPanel.style.flex = `0 0 ${editorPercent}%`
+        preview.style.flex = `0 0 ${previewPercent}%`
+    })
+
+    window.addEventListener("mouseup", () => {
+
+        if (!dragging) return
+
+        dragging = false
+        document.body.classList.remove("is-resizing")
     })
 }

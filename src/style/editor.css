@@ -710,7 +710,7 @@ body {
 
 .preview {
     flex: 1.03;
-    min-width: 0;
+    min-width: 320px;
     height: 100%;
     overflow: auto;
     padding: 28px 32px 32px;

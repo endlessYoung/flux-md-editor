@@ -1,4 +1,25 @@
 {
+  "name": "flux-md-editor",
+  "version": "0.1.0",
+  "description": "A local-first, pure front-end Markdown editor with preview, code highlight, KaTeX and Mermaid.",
+  "type": "module",
+  "main": "dist/flux-md-editor.umd.js",
+  "module": "dist/flux-md-editor.es.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/flux-md-editor.es.js",
+      "require": "./dist/flux-md-editor.umd.js"
+    }
+  },
+  "sideEffects": [
+    "src/style/editor.css"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
   "dependencies": {
     "@codemirror/commands": "^6.10.2",
     "@codemirror/lang-markdown": "^6.5.0",

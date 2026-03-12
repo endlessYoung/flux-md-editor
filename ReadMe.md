@@ -1,173 +1,152 @@
-# FluxMDEditor
+## FluxMDEditor
 
-> A modern, extensible Markdown editor with first-class support for Vue and React.
-
-FluxMDEditor is a lightweight yet powerful **Markdown editor framework** designed for modern web applications.
-It provides a **framework-agnostic core** with official adapters for **Vue** and **React**, enabling developers to integrate a fully featured Markdown editing experience in minutes.
+**本地优先、纯前端的 Markdown 编辑器**，支持代码高亮、KaTeX、Mermaid，大纲、同步滚动、自动保存等特性，可作为独立页面使用，也可以打成 npm 包集成到其他项目中。
 
 ---
 
-## ✨ Features
-
-* ⚡ **Fast and lightweight**
-* 🧩 **Plugin architecture**
-* 🧠 **Framework-agnostic core**
-* ⚛️ **React support**
-* 🟢 **Vue support**
-* 🖋 **Live Markdown preview**
-* 🎨 **Theme system**
-* 📦 **Modular architecture**
-* 🔌 **Extensible plugin ecosystem**
-
----
-
-# 📦 Installation
-
-## Install Core
+## 📦 安装（作为 npm 库使用）
 
 ```bash
-npm install @fluxmd/core
+npm install flux-md-editor
 ```
 
 ---
 
-## Vue
+## 🚀 核心 API 用法（不依赖框架）
 
-```bash
-npm install @fluxmd/vue
-```
-
-Usage:
-
-```vue
-<script setup>
-import { FluxEditor } from "@fluxmd/vue"
-</script>
-
-<template>
-  <FluxEditor />
-</template>
-```
-
----
-
-## React
-
-```bash
-npm install @fluxmd/react
-```
-
-Usage:
-
-```tsx
-import { FluxEditor } from "@fluxmd/react"
-
-export default function App() {
-  return <FluxEditor />
-}
-```
-
----
-
-# 🚀 Quick Start
-
-Using the core editor directly:
+入口：`src/index.ts` 暴露了一个核心方法：
 
 ```ts
-import { FluxEditor } from "@fluxmd/core"
+import { createFluxMdEditor } from "flux-md-editor"
+import "flux-md-editor/dist/flux-md-editor.css"
 
-const editor = new FluxEditor({
-  container: document.getElementById("editor"),
+const editorEl = document.getElementById("editor")!
+const previewEl = document.getElementById("preview")!
+
+const instance = createFluxMdEditor({
+  editorEl,
+  previewEl,
   initialValue: "# Hello FluxMDEditor"
 })
+
+// 读取当前 Markdown
+const md = instance.getMarkdown()
+
+// 设置 Markdown
+instance.setMarkdown("## 更新后的内容")
+
+// 不再需要时销毁（预留扩展点）
+instance.destroy()
+```
+
+HTML 结构示例：
+
+```html
+<div id="editor"></div>
+<div id="preview"></div>
 ```
 
 ---
 
-# 🧩 Plugin System
+## 🌱 在 Vue 项目里如何使用（简单示例）
 
-FluxMDEditor is designed with a **plugin-first architecture**.
+目前库本身没有强绑定 Vue，你可以在项目里自己封一层组件，类似：
 
-Create a plugin:
+```vue
+<template>
+  <div class="flux-md-editor">
+    <div ref="editorEl"></div>
+    <div ref="previewEl"></div>
+  </div>
+</template>
 
-```ts
-export default {
-  name: "example",
+<script setup lang="ts">
+import { onMounted, onBeforeUnmount, ref, watch } from "vue"
+import { createFluxMdEditor } from "flux-md-editor"
+import "flux-md-editor/dist/flux-md-editor.css"
 
-  install(editor) {
-    console.log("Plugin installed")
+const props = defineProps<{ modelValue: string }>()
+const emit = defineEmits<{
+  (e: "update:modelValue", value: string): void
+}>()
+
+const editorEl = ref<HTMLElement | null>(null)
+const previewEl = ref<HTMLElement | null>(null)
+let instance: ReturnType<typeof createFluxMdEditor> | null = null
+
+onMounted(() => {
+  if (!editorEl.value || !previewEl.value) return
+  instance = createFluxMdEditor({
+    editorEl: editorEl.value,
+    previewEl: previewEl.value,
+    initialValue: props.modelValue
+  })
+})
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (instance && val !== instance.getMarkdown()) {
+      instance.setMarkdown(val)
+    }
   }
+)
+
+onBeforeUnmount(() => {
+  instance?.destroy()
+  instance = null
+})
+</script>
+```
+
+在业务组件中使用：
+
+```vue
+<FluxMdEditor v-model="content" />
+```
+
+---
+
+## ⚛️ 在 React 项目里如何使用（简单示例）
+
+同样在宿主项目里封一层：
+
+```tsx
+import React, { useEffect, useRef } from "react"
+import { createFluxMdEditor } from "flux-md-editor"
+import "flux-md-editor/dist/flux-md-editor.css"
+
+export function FluxMdEditorReact(props: { value: string; onChange?: (v: string) => void }) {
+  const editorRef = useRef<HTMLDivElement | null>(null)
+  const previewRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!editorRef.current || !previewRef.current) return
+
+    const instance = createFluxMdEditor({
+      editorEl: editorRef.current,
+      previewEl: previewRef.current,
+      initialValue: props.value
+    })
+
+    return () => {
+      instance.destroy()
+    }
+  }, [])
+
+  return (
+    <div className="flux-md-editor">
+      <div ref={editorRef} />
+      <div ref={previewRef} />
+    </div>
+  )
 }
 ```
 
-Register plugin:
+在 React 应用中：
 
-```ts
-editor.use(plugin)
+```tsx
+<FluxMdEditorReact value={content} onChange={setContent} />
 ```
 
 ---
-
-# 🔧 Development
-
-Clone repository:
-
-```bash
-git clone https://github.com/fluxmd/fluxmd-editor.git
-```
-
-Install dependencies:
-
-```bash
-pnpm install
-```
-
-Start playground:
-
-```bash
-pnpm dev
-```
-
----
-
-# 🗺 Roadmap
-
-### v0.1
-
-* Core editor
-
----
-
-# 🤝 Contributing
-
-Contributions are welcome!
-
-Please follow these steps:
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Submit a pull request
-
----
-
-# 📄 License
-
-MIT License.
-
----
-
-# ⭐ Support
-
-If you like this project, please give it a **star** on GitHub.
-It helps the project grow and reach more developers.
-
----
-
-# 💡 Inspiration
-
-FluxMDEditor is inspired by modern editor ecosystems such as:
-
-* Typora
-* Obsidian
-* Notion

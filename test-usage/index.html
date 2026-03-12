@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>FluxMDEditor Test App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="../dist/flux-md-editor.css" />
+</head>
+
+<body>
+    <div class="topbar">
+        <div class="topbar-left">
+            <span class="editor-logo"><i class="fa-solid fa-pen-to-square"></i></span>
+            <span class="editor-name">FluxMDEditor</span>
+        </div>
+        <div class="topbar-right">
+            <div class="layout-toggle-group" aria-label="布局模式切换">
+                <button class="layout-toggle is-active" data-layout="split" type="button" title="编辑 + 预览">
+                    对半
+                </button>
+                <button class="layout-toggle" data-layout="edit" type="button" title="仅编辑">
+                    编辑
+                </button>
+                <button class="layout-toggle" data-layout="preview" type="button" title="仅预览">
+                    预览
+                </button>
+            </div>
+            <button class="topbar-icon-btn" id="file-open-btn" aria-label="打开本地 Markdown 文件"
+                title="打开本地 Markdown 文件">
+                <i class="fa-solid fa-folder-open"></i>
+            </button>
+            <button class="topbar-icon-btn" id="file-save-btn" aria-label="保存为 .md 文件" title="保存为 .md 文件">
+                <i class="fa-solid fa-floppy-disk"></i>
+            </button>
+            <button class="topbar-icon-btn" id="file-export-btn" aria-label="导出为 HTML" title="导出为 HTML">
+                <i class="fa-solid fa-file-export"></i>
+            </button>
+            <button class="topbar-icon-btn" id="toc-toggle" aria-label="切换大纲显示" title="切换大纲显示">
+                <i class="fa-solid fa-list-ul"></i><span class="toc-btn-text">大纲</span>
+            </button>
+            <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+                <span class="theme-toggle-icon"><i class="fa-solid fa-sun"></i></span>
+            </button>
+            <button class="settings-toggle" id="settings-toggle" aria-label="编辑器设置">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </div>
+    </div>
+    <div class="app">
+        <aside class="toc-panel" id="toc-panel"></aside>
+        <div class="editor-panel">
+            <header class="editor-header">
+                <div class="editor-title">
+                    <span class="editor-subtitle">文档编辑</span>
+                </div>
+            </header>
+            <div class="editor-toolbar" id="editor-toolbar"></div>
+            <div id="editor" class="editor flux-editor-surface"></div>
+        </div>
+        <div class="splitter" id="splitter"></div>
+        <div id="preview" class="preview flux-preview-surface"></div>
+    </div>
+
+    <div class="status-bar" id="status-bar"></div>
+
+    <button type="button" class="flux-back-to-top" id="back-to-top" aria-label="回到顶部" title="回到顶部">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <script type="module" src="./main.js"></script>
+</body>
+
+</html>
+
